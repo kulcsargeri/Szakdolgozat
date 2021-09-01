@@ -8,7 +8,7 @@ template< typename KEY, typename VALUE >
 class Tree
 {
 private:
-    InnerNode<KEY, VALUE>* root_;
+    InnerNode<KEY, VALUE>* root_; // TODO: esetleg Node<KEY, VALUE>*
     int children_count_;
 public:
     VALUE search(KEY key) const;
@@ -32,7 +32,7 @@ template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE> :: insert(KEY key, VALUE value){ //fő osztályban a beszúrás
     AdditionalNode<KEY, VALUE> a_node = root_->add(key, value);
     if(a_node.nodehelper_ != nullptr) //új gyökércsúcs keletkezett
-        this->root_ = a_node.nodehelper_;
+        this->root_ = static_cast<InnerNode<KEY, VALUE>*>(a_node.nodehelper_);
 }
 
 #endif
