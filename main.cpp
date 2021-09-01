@@ -13,7 +13,6 @@ int main(){
 	test.insert(6,"nyolcadik");
 	test.insert(10,"kilencedik");
 	test.insert(16,"tizedik");
-	test.insert(1,"tizenegyedik");
 	std::cout<<test.search(17)<<std::endl;
 	std::cout<<test.search(6)<<std::endl;
 	std::cout<<test.search(7)<<std::endl;
