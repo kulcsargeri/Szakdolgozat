@@ -4,6 +4,9 @@
 #include "node.h"
 
 template < typename KEY, typename VALUE >
+class Tree;
+
+template < typename KEY, typename VALUE >
 class InnerNode : public Node <KEY, VALUE>
 {
     private:
@@ -19,6 +22,8 @@ class InnerNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         virtual VALUE search(KEY key) const override;
         virtual void remove(KEY key) override;
+        // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
+        friend class Tree<KEY, VALUE>; 
 };
 
 template < typename KEY, typename VALUE >
@@ -42,7 +47,7 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
         ++i;
     AdditionalNode<KEY, VALUE> a_node = this->children[i]->add(key, value); //rekurzív hívások levélszintig
     if(a_node.nodehelper_ == nullptr) return a_node; //nem történt hasítás lejjebbi szinten  /*jobb oldal bal gyerek kell még*/
-    if(this->keys[this->key_count_] == std::numeric_limits<KEY>::max()){ //nem telített a csúcs, nem fogunk hasítani, csak beillesztjük a kapott KEY, VALUE párt
+    if(this->keys[this->key_count_ - 1] == std::numeric_limits<KEY>::max()){ //nem telített a csúcs, nem fogunk hasítani, csak beillesztjük a kapott KEY, VALUE párt
         this->FirstCopy(i, this->key_count_, a_node);
         a_node.nodehelper_ = nullptr;
         a_node.keyhelper_ = 0;

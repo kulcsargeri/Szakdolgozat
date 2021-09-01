@@ -3,6 +3,7 @@
 
 #include "node.h"
 #include "innerNode.h"
+#include "leafNode.h"
 
 template< typename KEY, typename VALUE >
 class Tree
@@ -20,6 +21,8 @@ template< typename KEY, typename VALUE >
 Tree<KEY, VALUE> :: Tree(int _children_count){
     children_count_ = _children_count;
     this->root_ = new InnerNode<KEY, VALUE>(_children_count-1, _children_count);
+    this->root_->children[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
+
 }
 
 template< typename KEY, typename VALUE >

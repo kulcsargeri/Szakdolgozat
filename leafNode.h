@@ -9,8 +9,8 @@ class LeafNode : public Node <KEY, VALUE>
     private:
         KEY key_;
         VALUE value_;
-        LeafNode(KEY _key, VALUE _value) : key_(key), value_(value) {};
     public:
+        LeafNode(KEY _key, VALUE _value) : key_(_key), value_(_value) {};
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
         virtual void remove(KEY key) override;
@@ -27,8 +27,8 @@ AdditionalNode<KEY, VALUE> LeafNode<KEY, VALUE>::add(KEY key, VALUE value){ //ú
 
 template < typename KEY, typename VALUE >
 VALUE LeafNode<KEY, VALUE>::search(KEY key) const { //visszatérés VALUE-val, ha volt ilyen elem
-    if(this->key_[0] == key)
-        return this->value_[0];
+    if(this->key_ == key)
+        return this->value_;
     return nullptr;
 }
 
