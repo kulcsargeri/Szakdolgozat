@@ -13,6 +13,7 @@ class LeafNode : public Node <KEY, VALUE>
         LeafNode(KEY _key, VALUE _value) : key_(_key), value_(_value) {};
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
+        void print() override;
         virtual void remove(KEY key) override;
         ~LeafNode();
 };
@@ -20,8 +21,16 @@ class LeafNode : public Node <KEY, VALUE>
 template < typename KEY, typename VALUE >
 AdditionalNode<KEY, VALUE> LeafNode<KEY, VALUE>::add(KEY key, VALUE value){ //új levél, visszatérés feljebbi szintre
     AdditionalNode<KEY, VALUE> a_node;
-    a_node.nodehelper_ = new LeafNode(key, value);
-    a_node.keyhelper_ = key;
+    if(key > this->key_){
+        a_node.nodehelper_ = new LeafNode(key, value);
+        a_node.keyhelper_ = key;
+    }else{
+        a_node.nodehelper_ = this;
+        a_node.keyhelper_ = this->key_;
+        auto leaf = new LeafNode(key, value);
+        this->key_ = leaf->key_;
+        this->value_ = leaf->value_;
+    }
     return a_node;
 }
 
@@ -30,6 +39,11 @@ VALUE LeafNode<KEY, VALUE>::search(KEY key) const { //visszatérés VALUE-val, h
     if(this->key_ == key)
         return this->value_;
     return nullptr;
+}
+
+template < typename KEY, typename VALUE >
+void LeafNode<KEY, VALUE>::print(){
+    std::cout<<"("<<key_<<") ";
 }
 
 template < typename KEY, typename VALUE >

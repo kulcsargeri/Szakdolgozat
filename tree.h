@@ -14,6 +14,7 @@ private:
 public:
     VALUE search(KEY key) const;
     void insert(KEY key, VALUE value);
+    void structure();
     Tree(int _children_count);
 };
 
@@ -36,6 +37,12 @@ void Tree<KEY, VALUE> :: insert(KEY key, VALUE value){ //fő osztályban a besz�
     AdditionalNode<KEY, VALUE> a_node = root_->add(key, value);
     if(a_node.nodehelper_ != nullptr) //új gyökércsúcs keletkezett
         this->root_ = static_cast<InnerNode<KEY, VALUE>*>(a_node.nodehelper_);
+}
+
+template< typename KEY, typename VALUE >
+void Tree<KEY, VALUE> :: structure(){
+    this->root_->print();
+    std::cout<<"\n";
 }
 
 #endif

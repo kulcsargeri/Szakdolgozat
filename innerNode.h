@@ -22,6 +22,7 @@ class InnerNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         virtual VALUE search(KEY key) const override;
         virtual void remove(KEY key) override;
+        void print() override;
         // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
         friend class Tree<KEY, VALUE>; 
 };
@@ -133,6 +134,17 @@ void InnerNode<KEY, VALUE>::SecondCopy(int &a, int b, int &innerind, InnerNode<K
         ++a;
         ++innerind;
     }
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::print(){
+    std::cout<<"(";
+    children[0]->print();
+    for(int i=0; i<key_count_ && keys[i] != std::numeric_limits<KEY>::max(); ++i){
+        std::cout<<keys[i]<<" ";
+        children[i+1]->print();
+    }
+    std::cout<<")";
 }
 
 #endif

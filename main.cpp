@@ -7,10 +7,12 @@ int main(){
 	test.insert(9,"második");
 	test.insert(11,"harmadik");
 	test.insert(15,"negyedik");
+	test.structure();
 	test.insert(8,"ötödik");
 	test.insert(12,"hatodik");
 	test.insert(17,"hetedik");
 	test.insert(6,"nyolcadik");
+	test.structure();
 	test.insert(10,"kilencedik");
 	test.insert(16,"tizedik");
 	std::cout<<test.search(17)<<std::endl;

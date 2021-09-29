@@ -20,6 +20,7 @@ class Node
         virtual VALUE search(KEY key) const = 0;
         virtual void remove(KEY key) = 0;
         virtual AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) = 0;
+        virtual void print() = 0;
 };
 
 template < typename KEY, typename VALUE >
