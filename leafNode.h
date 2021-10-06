@@ -25,11 +25,10 @@ AdditionalNode<KEY, VALUE> LeafNode<KEY, VALUE>::add(KEY key, VALUE value){ //ú
         a_node.nodehelper_ = new LeafNode(key, value);
         a_node.keyhelper_ = key;
     }else{
-        a_node.nodehelper_ = this;
+        a_node.nodehelper_ = new LeafNode(this->key_, this->value_);
         a_node.keyhelper_ = this->key_;
-        auto leaf = new LeafNode(key, value);
-        this->key_ = leaf->key_;
-        this->value_ = leaf->value_;
+        this->key_ = key;
+        this->value_ = value;
     }
     return a_node;
 }

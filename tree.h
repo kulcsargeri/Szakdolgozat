@@ -23,7 +23,7 @@ Tree<KEY, VALUE> :: Tree(int _children_count){
     children_count_ = _children_count;
     this->root_ = new InnerNode<KEY, VALUE>(_children_count-1, _children_count);
     this->root_->children[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
-
+    this->root_->root_ = true;
 }
 
 template< typename KEY, typename VALUE >
@@ -35,8 +35,10 @@ VALUE Tree<KEY, VALUE> :: search(KEY key) const { //fő osztályban a keresés
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE> :: insert(KEY key, VALUE value){ //fő osztályban a beszúrás
     AdditionalNode<KEY, VALUE> a_node = root_->add(key, value);
-    if(a_node.nodehelper_ != nullptr) //új gyökércsúcs keletkezett
+    if(a_node.nodehelper_ != nullptr){ //új gyökércsúcs keletkezett
+
         this->root_ = static_cast<InnerNode<KEY, VALUE>*>(a_node.nodehelper_);
+    }
 }
 
 template< typename KEY, typename VALUE >

@@ -60,6 +60,7 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
         int j=(this->children_count_+1)/2;
         if(i != j){ //nem a második fél első eleme a beszúrandó elem
             KEY keyhelper = this->keys[j];
+            this->keys[j] = std::numeric_limits<KEY>::max();
             ++j;
             innerhelper->children[innerind] = this->children[j];
             this->children[j] = nullptr;
@@ -69,14 +70,32 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
             ++innerind;
             a_node.keyhelper_ = keyhelper;
         } else { //második fél első eleme
-            ++j;
             innerhelper->children[innerind] = a_node.nodehelper_;
-            ++innerind;
         }
         SecondCopy(j, this->key_count_, innerind, innerhelper);
     }else{ //első félbe kell beilleszteni
-        this->FirstCopy(i, (this->children_count_+1)/2, a_node);
-        a_node.keyhelper_ = this->keys[i];
+        //* this->FirstCopy(i, (this->children_count_+1)/2, a_node); *// 
+        //ez elromlott mert két dolgot is vissza kellene adni, hogy folytathassuk
+        int b = (this->children_count_+1)/2;
+        KEY k = this->keys[i];
+        Node<KEY, VALUE>* v = this->children[i+1];
+        this->keys[i] = a_node.keyhelper_;
+        this->children[i+1] = a_node.nodehelper_;
+        KEY khelper;
+        Node<KEY, VALUE>* vhelper;
+        while(++i<b && k != std::numeric_limits<KEY>::max()){
+            khelper = this->keys[i];
+            vhelper = this->children[i+1];
+            this->keys[i] = k;
+            this->children[i+1] = v;
+            k = khelper;
+            v = vhelper;
+        }
+        innerhelper->keys[innerind] = this->keys[i];
+        innerhelper->children[innerind] = vhelper;
+        ++innerind;
+        a_node.keyhelper_ = khelper;
+        this->keys[i] = std::numeric_limits<KEY>::max();
         ++i;
         innerhelper->children[innerind] = this->children[i];
         this->children[i] = nullptr;

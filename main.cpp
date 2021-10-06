@@ -9,12 +9,15 @@ int main(){
 	test.insert(15,"negyedik");
 	test.structure();
 	test.insert(8,"ötödik");
+	test.structure();
 	test.insert(12,"hatodik");
 	test.insert(17,"hetedik");
 	test.insert(6,"nyolcadik");
 	test.structure();
 	test.insert(10,"kilencedik");
+	test.structure();
 	test.insert(16,"tizedik");
+	test.structure();
 	std::cout<<test.search(17)<<std::endl;
 	std::cout<<test.search(6)<<std::endl;
 	std::cout<<test.search(7)<<std::endl;
