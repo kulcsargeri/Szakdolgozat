@@ -13,8 +13,8 @@ class LeafNode : public Node <KEY, VALUE>
         LeafNode(KEY _key, VALUE _value) : key_(_key), value_(_value) {};
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
+        bool remove(KEY key) override;
         void print() override;
-        virtual void remove(KEY key) override;
         ~LeafNode();
 };
 
@@ -46,8 +46,9 @@ void LeafNode<KEY, VALUE>::print(){
 }
 
 template < typename KEY, typename VALUE >
-void LeafNode<KEY, VALUE>::remove(KEY key) { 
-    
+bool LeafNode<KEY, VALUE>::remove(KEY key) { 
+    this->~LeafNode();
+    return false;
 }
 
 #endif

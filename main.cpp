@@ -21,6 +21,8 @@ int main(){
 	std::cout<<test.search(17)<<std::endl;
 	std::cout<<test.search(6)<<std::endl;
 	std::cout<<test.search(7)<<std::endl;
+	test.remove(6);
+	test.structure();
 	std::cout<<test.search(16)<<std::endl;
 	return 0;
 }

@@ -15,13 +15,14 @@ class InnerNode : public Node <KEY, VALUE>
         KEY *keys;
         Node<KEY, VALUE> **children;
         bool root_ = false;
+        bool leaf_ = false;
         void FirstCopy(int &a, int b, AdditionalNode<KEY, VALUE> a_node);
         void SecondCopy(int& a, int b, int& innerind, InnerNode<KEY, VALUE>* innerhelper);
     public:
         InnerNode(int _key_count, int _children_count);
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
-        virtual VALUE search(KEY key) const override;
-        virtual void remove(KEY key) override;
+        VALUE search(KEY key) const override;
+        bool remove(KEY key) override;
         void print() override;
         // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
         friend class Tree<KEY, VALUE>; 
@@ -56,6 +57,7 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
     }
     int innerind = 0; //hasítani fogunk
     InnerNode<KEY, VALUE>* innerhelper = new InnerNode(this->key_count_, this->children_count_);
+    if(this->leaf_) innerhelper->leaf_ = true;
     if(i>=(this->children_count_+1)/2){ //beillesztés a csúcs második felébe kerül, így másolás után tudjuk ezt megtenni
         int j=(this->children_count_+1)/2;
         if(i != j){ //nem a második fél első eleme a beszúrandó elem
@@ -124,7 +126,77 @@ VALUE InnerNode<KEY, VALUE>::search(KEY key) const { //rekurzív lineáris keres
 }
 
 template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::remove(KEY key) {
+bool InnerNode<KEY, VALUE>::remove(KEY key) {
+    int ind = 0;
+    while(ind<this->key_count_ && this->keys[ind]<=key){
+        ++ind;
+    }
+    bool split = this->children[ind]->remove();
+    if(leaf_){
+        if(ind == 0)
+        this->children[ind] = this->children[ind+1];
+        for(ind; ind+1<this->key_count_; ++ind){
+            this->keys[ind] = this->keys[ind+1];
+            this->children[ind+1] = this->children[ind+2];
+        }
+        if(this->keys[key_count_-1/2] == std::numeric_limits<KEY>::max())
+            return true;
+        return false;
+    }
+    if(!split) return false;
+    if(ind != 0){
+        if(this->children[ind-1]->keys[key_count_-1/2] != std::numeric_limits<KEY>::max()){
+            int from_ind = key_count_-1;
+            while(this->children[ind-1]->keys[from_ind] == std::numeric_limits<KEY>::max()){
+                --from_ind;
+            }
+            KEY k = this->keys[ind-1];
+            VALUE v = this->children[ind]->children[0];
+            this->keys[ind-1] = this->children[ind-1]->keys[from_ind];
+            this->children[ind]->children[0] = this->children[ind-1]->children[from_ind];
+            this->children[ind-1]->keys[from_ind] = std::numeric_limits<KEY>::max();
+            this->children[ind-1]->children[from_ind] = nullptr;
+            for(int i=0; i<(key_count_-1/2+1)){
+                 KEY khelper = this->children[ind]->keys[i];
+                 VALUE vhelper = this->children[ind]->children[i+1];
+                 this->children[ind]->keys[i] = k;
+                 this->children[ind]->children[i+1] = v;
+                 k = khelper;
+                 v = vhelper;
+            }
+        }
+        return false;
+    }
+    if(ind != this->key_count_-1){
+        if(this->children[ind+1]->keys[key_count_-1/2] != std::numeric_limits<KEY>::max()){
+            this->children[ind]->keys[key_count_-1/2-1] = this->keys[ind];
+            this->keys[ind] = this->children[ind+1]->keys[0];
+            this->children[ind]->children[key_count_-1/2] = this->children[ind+1]->children[0];
+            this->children[ind+1]->children[0] = this->children[ind+1]->children[1];
+            int i = 0;
+            for(; i<key_count_-1; ++i){
+                this->children[ind+1]->keys[i] = this->children[ind+1]->keys[i+1];
+                this->children[ind+1]->children[i+1] = this->children[ind+1]->children[i+2];
+            }
+            this->children[ind+1]->keys[i] = std::numeric_limits<KEY>::max();
+            this->children[ind+1]->children[i+1] = nullptr;
+        }
+        return false;
+    }
+    if(ind != this->key_count_-1){
+        this->children[ind]->keys[key_count_-1/2-1] = this->keys[ind-1];
+        this->children[ind]->children[key_count_-1/2] = this->children[ind+1]->children[0];
+        for(int i=0; i<this->key_count+1/2; ++i){
+            this->children[ind]->keys[key_count_-1/2+i] = this->children[ind+1]->keys[i];
+            this->children[ind]->children[key_count_-1/2+1+i] = this->children[ind+1]->children[i+1];
+        }
+        for(; ind<key_count_; ++ind){
+            this->keys[ind] = this->keys[ind+1];
+            this->children[ind+1] = this->children[ind+2];
+        }
+        this->keys[ind] = std::numeric_limits<KEY>::max();
+        this->children[ind+1] = nullptr;
+    }
 }
 
 template < typename KEY, typename VALUE >
