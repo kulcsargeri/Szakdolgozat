@@ -19,7 +19,7 @@ class LeafNode : public Node <KEY, VALUE>
         KEY GetKeyAtIndex(int keyIndex) override;
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
         void SetKeyAtIndex(KEY key, int keyIndex) override;
-        void SetValueAtIndex(VALUE value, int valueIndex) override;
+        void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
         ~LeafNode();
 };
 
@@ -80,9 +80,9 @@ void LeafNode<KEY, VALUE>::SetKeyAtIndex(KEY key, int keyIndex)
 }
 
 template < typename KEY, typename VALUE >
-void LeafNode<KEY, VALUE>::SetValueAtIndex(VALUE value, int valueIndex) 
+void LeafNode<KEY, VALUE>::SetValueAtIndex(Node<KEY,VALUE>* value, int valueIndex) 
 {
-
+    
 }
 
 #endif

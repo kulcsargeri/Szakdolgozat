@@ -28,7 +28,7 @@ class InnerNode : public Node <KEY, VALUE>
         KEY GetKeyAtIndex(int keyIndex) override;
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
         void SetKeyAtIndex(KEY key, int keyIndex) override;
-        void SetValueAtIndex(VALUE value, int valueIndex) override;
+        void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
         // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
         friend class Tree<KEY, VALUE>; 
 };
@@ -139,7 +139,7 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
     bool split = this->children[ind]->remove(key);
     if(leaf_){
         if(ind == 0)
-        this->children[ind] = this->children[ind+1];
+            this->children[ind] = this->children[ind+1];
         for(ind; ind+1<this->key_count_; ++ind){
             this->keys[ind] = this->keys[ind+1];
             this->children[ind+1] = this->children[ind+2];
@@ -156,14 +156,14 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
                 --from_ind;
             }
             KEY k = this->keys[ind-1];
-            VALUE v = this->children[ind]->GetValueAtIndex(0);//
+            Node<KEY, VALUE>* v = this->children[ind]->GetValueAtIndex(0);//
             this->keys[ind-1] = this->children[ind-1]->GetKeyAtIndex(from_ind);//
             this->children[ind]->SetValueAtIndex(this->children[ind-1]->GetValueAtIndex(from_ind),0);//
             this->children[ind-1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),from_ind);//
             this->children[ind-1]->SetValueAtIndex(nullptr,from_ind);//
             for(int i=0; i<((key_count_-1)/2+1); ++i){
                  KEY khelper = this->children[ind]->GetKeyAtIndex(i);//
-                 VALUE vhelper = this->children[ind]->GetValueAtIndex(i+1);//
+                 Node<KEY,VALUE>* vhelper = this->children[ind]->GetValueAtIndex(i+1);//
                  this->children[ind]->SetKeyAtIndex(k,i);//
                  this->children[ind]->SetValueAtIndex(v,i+1);//
                  k = khelper;
@@ -202,6 +202,7 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
         this->keys[ind] = std::numeric_limits<KEY>::max();
         this->children[ind+1] = nullptr;
     }
+    return false;
 }
 
 template < typename KEY, typename VALUE >
@@ -220,7 +221,7 @@ void InnerNode<KEY, VALUE>::SetKeyAtIndex(KEY key, int keyIndex){
 }
 
 template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::SetValueAtIndex(VALUE value, int valueIndex){
+void InnerNode<KEY, VALUE>::SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex){
     this->children[valueIndex] = value;
 }
 
