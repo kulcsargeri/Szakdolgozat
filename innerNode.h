@@ -23,6 +23,7 @@ class InnerNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
+        void ConvertToNewTree(Node<KEY, VALUE>* root) override;
         void print() override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
@@ -138,12 +139,15 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
     }
     bool split = this->children[ind]->remove(key);
     if(leaf_){
+        this->children[ind]->~Node();
         if(ind == 0)
             this->children[ind] = this->children[ind+1];
         for(ind; ind+1<this->key_count_; ++ind){
             this->keys[ind] = this->keys[ind+1];
             this->children[ind+1] = this->children[ind+2];
         }
+        this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
+        this->children[children_count_-1] = nullptr;
         if(this->keys[(key_count_-1)/2] == std::numeric_limits<KEY>::max())
             return true;
         return false;
@@ -203,6 +207,18 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
         this->children[ind+1] = nullptr;
     }
     return false;
+}
+
+template< typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
+    for(int ind = key_count_-1; ind >= 0; --ind){
+        if(this->keys[ind] == std::numeric_limits<KEY>::max()) continue;
+        this->children[ind+1]->ConvertToNewTree(root);
+        if(leaf_) this->children[ind+1]->~Node();
+    }
+    this->children[0]->ConvertToNewTree(root);
+    this->children[0]->~Node();
+    this->~InnerNode();
 }
 
 template < typename KEY, typename VALUE >

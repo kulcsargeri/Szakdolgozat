@@ -15,6 +15,7 @@ public:
     VALUE search(KEY key) const;
     void insert(KEY key, VALUE value);
     void remove(KEY key);
+    void changeChildrenCount(int new_children_count);
     void structure();
     Tree(int _children_count);
 };
@@ -45,7 +46,19 @@ void Tree<KEY, VALUE> :: insert(KEY key, VALUE value){ //fő osztályban a besz�
 
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE> :: remove(KEY key){
-    this->root_->remove(key);
+    VALUE v = this->root_->search(key);
+    VALUE i = nullptr;
+    if(v != i){
+        this->root_->remove(key);
+        std::cout<<"Successful deletion\n";
+    }
+    else std::cout<<"Unseccessful deletion\n";
+}
+
+template< typename KEY, typename VALUE >
+void Tree<KEY, VALUE> :: changeChildrenCount(int new_children_count){
+    Tree<KEY, VALUE> tree = new Tree(new_children_count);
+    this->root_->ConvertToNewTree(tree->root_);
 }
 
 template< typename KEY, typename VALUE >

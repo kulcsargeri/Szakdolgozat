@@ -20,6 +20,7 @@ class Node
         virtual VALUE search(KEY key) const = 0;
         virtual bool remove(KEY key) = 0;
         virtual AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) = 0;
+        virtual void ConvertToNewTree(Node<KEY, VALUE>* root) = 0;
         virtual void print() = 0;
         virtual bool GetKeyIsMaxAtIndex(int keyIndex) = 0;
         virtual KEY GetKeyAtIndex(int keyIndex) = 0;

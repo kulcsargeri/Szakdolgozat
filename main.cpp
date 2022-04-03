@@ -3,12 +3,12 @@
 
 int main(){
 	Tree<int, std::string> test(4);
-	test.insert(7,"első");
-	test.insert(9,"második");
+	test.insert(7,"elso");
+	test.insert(9,"masodik");
 	test.insert(11,"harmadik");
 	test.insert(15,"negyedik");
 	test.structure();
-	test.insert(8,"ötödik");
+	test.insert(8,"otodik");
 	test.structure();
 	test.insert(12,"hatodik");
 	test.insert(17,"hetedik");
