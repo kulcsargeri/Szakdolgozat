@@ -25,6 +25,7 @@ class InnerNode : public Node <KEY, VALUE>
         bool remove(KEY key) override;
         void ConvertToNewTree(Node<KEY, VALUE>* root) override;
         void print() override;
+        bool IsKeyInTree(KEY key) const override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
@@ -132,19 +133,30 @@ VALUE InnerNode<KEY, VALUE>::search(KEY key) const { //rekurzív lineáris keres
 }
 
 template < typename KEY, typename VALUE >
+bool InnerNode<KEY, VALUE>::IsKeyInTree(KEY key) const { //rekurzív lineáris keresés
+    for(int i=0; i<this->key_count_; ++i){
+        if(this->keys[i]>key)
+            return this->children[i]->IsKeyInTree(key);
+    }
+    return this->children[this->key_count_]->IsKeyInTree(key);
+}
+
+template < typename KEY, typename VALUE >
 bool InnerNode<KEY, VALUE>::remove(KEY key) {
     int ind = 0;
     while(ind<this->key_count_ && this->keys[ind]<=key){
         ++ind;
     }
     bool split = this->children[ind]->remove(key);
-    if(leaf_){
-        this->children[ind]->~Node();
-        if(ind == 0)
+    if(leaf_){//
+        delete this->children[ind];
+        if(ind == 0){
             this->children[ind] = this->children[ind+1];
-        for(ind; ind+1<this->key_count_; ++ind){
-            this->keys[ind] = this->keys[ind+1];
-            this->children[ind+1] = this->children[ind+2];
+            ++ind;
+        }
+        for(ind; ind<this->key_count_; ++ind){
+            this->keys[ind-1] = this->keys[ind];
+            this->children[ind] = this->children[ind+1];
         }
         this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
         this->children[children_count_-1] = nullptr;
@@ -152,52 +164,70 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
             return true;
         return false;
     }
-    if(!split) return false;
+    if(!split) return false;//tesztelve
     if(ind != 0){
-        if(this->children[ind-1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){//
+        if(this->children[ind-1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){//tesztelve
             int from_ind = key_count_-1;
-            while(this->children[ind-1]->GetKeyIsMaxAtIndex(from_ind)){//
+            while(this->children[ind-1]->GetKeyIsMaxAtIndex(from_ind)){
                 --from_ind;
             }
-            KEY k = this->keys[ind-1];
-            Node<KEY, VALUE>* v = this->children[ind]->GetValueAtIndex(0);//
-            this->keys[ind-1] = this->children[ind-1]->GetKeyAtIndex(from_ind);//
-            this->children[ind]->SetValueAtIndex(this->children[ind-1]->GetValueAtIndex(from_ind),0);//
-            this->children[ind-1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),from_ind);//
-            this->children[ind-1]->SetValueAtIndex(nullptr,from_ind);//
-            for(int i=0; i<((key_count_-1)/2+1); ++i){
-                 KEY khelper = this->children[ind]->GetKeyAtIndex(i);//
-                 Node<KEY,VALUE>* vhelper = this->children[ind]->GetValueAtIndex(i+1);//
-                 this->children[ind]->SetKeyAtIndex(k,i);//
-                 this->children[ind]->SetValueAtIndex(v,i+1);//
-                 k = khelper;
-                 v = vhelper;
+            ++from_ind;
+            this->children[ind-1]->SetKeyAtIndex(this->keys[ind-1],from_ind);
+            this->children[ind-1]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(0),from_ind+1);
+            for(int i=0; this->children[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i){
+                 this->children[ind-1]->SetKeyAtIndex(this->children[ind]->GetKeyAtIndex(i),from_ind);
+                 this->children[ind-1]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(i+1),from_ind+1);
             }
+            delete this->children[ind];
+            for(ind; ind<key_count_; ++ind){
+                this->keys[ind-1] = this->keys[ind];
+                this->children[ind] = this->children[ind+1];
+            }
+            this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
+            this->children[children_count_-1] = nullptr;
+            if(this->keys[(key_count_-1)/2] == std::numeric_limits<KEY>::max())
+                return true;
+            return false;
+        }else{//tesztelve
+            int from_ind = key_count_-1;
+            while(this->children[ind-1]->GetKeyIsMaxAtIndex(from_ind)){
+                --from_ind;
+            }
+            for(int i=key_count_-1; i>0; --i){
+                this->children[ind]->SetKeyAtIndex(this->children[ind]->GetKeyAtIndex(i-1),i);
+                this->children[ind]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(i),i+1);
+            }
+            this->children[ind]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(0),1);
+            this->children[ind]->SetValueAtIndex(this->children[ind-1]->GetValueAtIndex(from_ind+1),0);
+            this->children[ind]->SetKeyAtIndex(this->keys[ind-1],0);
+            this->keys[ind-1] = this->children[ind-1]->GetKeyAtIndex(from_ind);
+            this->children[ind-1]->SetValueAtIndex(nullptr,from_ind+1);
+            this->children[ind-1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),from_ind);
+            return false;
         }
-        return false;
     }
     if(ind != this->key_count_-1){
-        if(!this->children[ind+1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){//
-            this->children[ind]->SetKeyAtIndex(this->keys[ind],(key_count_-1)/2-1);//
-            this->keys[ind] = this->children[ind+1]->GetKeyAtIndex(0);//
-            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);//
-            this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(1),0);//
+        if(!this->children[ind+1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){
+            this->children[ind]->SetKeyAtIndex(this->keys[ind],(key_count_-1)/2-1);
+            this->keys[ind] = this->children[ind+1]->GetKeyAtIndex(0);
+            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);
+            this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(1),0);
             int i = 0;
             for(; i<key_count_-1; ++i){
-                this->children[ind+1]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i+1),i);//
-                this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+2),i+1);//
+                this->children[ind+1]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i+1),i);
+                this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+2),i+1);
             }
-            this->children[ind+1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),i);//
-            this->children[ind+1]->SetValueAtIndex(nullptr,i+1);//
+            this->children[ind+1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),i);
+            this->children[ind+1]->SetValueAtIndex(nullptr,i+1);
         }
         return false;
     }
     if(ind != this->key_count_-1){
-        this->children[ind]->SetKeyAtIndex(this->keys[ind-1],(key_count_-1)/2-1);//
-        this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);//
-        for(int i=0; i<(this->key_count_+1)/2; ++i){//
-            this->children[ind]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i),(key_count_-1)/2+i);//
-            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+1),(key_count_-1)/2+1+i);//
+        this->children[ind]->SetKeyAtIndex(this->keys[ind-1],(key_count_-1)/2-1);
+        this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);
+        for(int i=0; i<(this->key_count_+1)/2; ++i){
+            this->children[ind]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i),(key_count_-1)/2+i);
+            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+1),(key_count_-1)/2+1+i);
         }
         for(; ind<key_count_; ++ind){
             this->keys[ind] = this->keys[ind+1];

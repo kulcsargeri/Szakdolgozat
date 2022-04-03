@@ -29,7 +29,7 @@ Tree<KEY, VALUE> :: Tree(int _children_count){
     this->root_->leaf_ = true;
 }
 
-template< typename KEY, typename VALUE >
+template< typename KEY, typename VALUE > //TODO: try catch nullptr
 VALUE Tree<KEY, VALUE> :: search(KEY key) const { //fő osztályban a keresés
     VALUE v = root_->search(key);
     return v;
@@ -46,9 +46,7 @@ void Tree<KEY, VALUE> :: insert(KEY key, VALUE value){ //fő osztályban a besz�
 
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE> :: remove(KEY key){
-    VALUE v = this->root_->search(key);
-    VALUE i = nullptr;
-    if(v != i){
+    if(this->root_->IsKeyInTree(key)){
         this->root_->remove(key);
         std::cout<<"Successful deletion\n";
     }

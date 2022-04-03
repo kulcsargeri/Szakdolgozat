@@ -15,6 +15,7 @@ class LeafNode : public Node <KEY, VALUE>
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
         void ConvertToNewTree(Node<KEY, VALUE>* root) override;
+        bool IsKeyInTree(KEY key) const override;
         void print() override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
@@ -59,6 +60,11 @@ bool LeafNode<KEY, VALUE>::remove(KEY key) {
 template< typename KEY, typename VALUE >
 void LeafNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
     root->add(this->key_, this->value_);
+}
+
+template< typename KEY, typename VALUE >
+bool LeafNode<KEY, VALUE>::IsKeyInTree(KEY key) const {
+    return key == key_;
 }
 
 template < typename KEY, typename VALUE >
