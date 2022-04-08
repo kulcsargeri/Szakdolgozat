@@ -148,7 +148,7 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
         ++ind;
     }
     bool split = this->children[ind]->remove(key);
-    if(leaf_){//
+    if(leaf_){//tesztelve
         delete this->children[ind];
         if(ind == 0){
             this->children[ind] = this->children[ind+1];
@@ -160,13 +160,13 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
         }
         this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
         this->children[children_count_-1] = nullptr;
-        if(this->keys[(key_count_-1)/2] == std::numeric_limits<KEY>::max())
+        if(this->keys[key_count_/2-1] == std::numeric_limits<KEY>::max())
             return true;
         return false;
     }
     if(!split) return false;//tesztelve
     if(ind != 0){
-        if(this->children[ind-1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){//tesztelve
+        if(this->children[ind-1]->GetKeyIsMaxAtIndex(key_count_/2)){//tesztelve
             int from_ind = key_count_-1;
             while(this->children[ind-1]->GetKeyIsMaxAtIndex(from_ind)){
                 --from_ind;
@@ -174,7 +174,7 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
             ++from_ind;
             this->children[ind-1]->SetKeyAtIndex(this->keys[ind-1],from_ind);
             this->children[ind-1]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(0),from_ind+1);
-            for(int i=0; this->children[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i){
+            for(int i=0; this->children[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
                  this->children[ind-1]->SetKeyAtIndex(this->children[ind]->GetKeyAtIndex(i),from_ind);
                  this->children[ind-1]->SetValueAtIndex(this->children[ind]->GetValueAtIndex(i+1),from_ind+1);
             }
@@ -185,7 +185,7 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
             }
             this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
             this->children[children_count_-1] = nullptr;
-            if(this->keys[(key_count_-1)/2] == std::numeric_limits<KEY>::max())
+            if(this->keys[key_count_/2-1] == std::numeric_limits<KEY>::max())
                 return true;
             return false;
         }else{//tesztelve
@@ -206,36 +206,50 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
             return false;
         }
     }
-    if(ind != this->key_count_-1){
-        if(!this->children[ind+1]->GetKeyIsMaxAtIndex((key_count_-1)/2)){
-            this->children[ind]->SetKeyAtIndex(this->keys[ind],(key_count_-1)/2-1);
-            this->keys[ind] = this->children[ind+1]->GetKeyAtIndex(0);
-            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);
-            this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(1),0);
-            int i = 0;
-            for(; i<key_count_-1; ++i){
-                this->children[ind+1]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i+1),i);
-                this->children[ind+1]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+2),i+1);
+    if(ind == 0){//tesztelve
+        if(this->children[1]->GetKeyIsMaxAtIndex(key_count_/2)){
+            int from_ind = 0;
+            while(!this->children[0]->GetKeyIsMaxAtIndex(from_ind)){
+                ++from_ind;
             }
-            this->children[ind+1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),i);
-            this->children[ind+1]->SetValueAtIndex(nullptr,i+1);
+            this->children[0]->SetKeyAtIndex(this->keys[0],from_ind);
+            this->children[0]->SetValueAtIndex(this->children[1]->GetValueAtIndex(0),from_ind+1);
+            ++from_ind;
+            for(int i=0; this->children[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
+                 this->children[0]->SetKeyAtIndex(this->children[1]->GetKeyAtIndex(i),from_ind);
+                 this->children[0]->SetValueAtIndex(this->children[1]->GetValueAtIndex(i+1),from_ind+1);
+            }
+            delete this->children[1];
+            ++ind;
+            for(ind; ind<key_count_; ++ind){
+                this->keys[ind-1] = this->keys[ind];
+                this->children[ind] = this->children[ind+1];
+            }
+            this->keys[key_count_-1] = std::numeric_limits<KEY>::max();
+            this->children[children_count_-1] = nullptr;
+            if(this->keys[key_count_/2-1] == std::numeric_limits<KEY>::max())
+                return true;
+            return false;
+        }else{
+            int from_ind = 0;
+            while(!this->children[0]->GetKeyIsMaxAtIndex(from_ind)){
+                ++from_ind;
+            }
+            this->children[0]->SetValueAtIndex(this->children[1]->GetValueAtIndex(0),from_ind+1);
+            this->children[1]->SetValueAtIndex(this->children[1]->GetValueAtIndex(1),0);
+            this->children[0]->SetKeyAtIndex(this->keys[0],from_ind);
+            this->keys[0] = this->children[1]->GetKeyAtIndex(0);
+            for(int i=0; i<key_count_-1; ++i){
+                this->children[1]->SetKeyAtIndex(this->children[1]->GetKeyAtIndex(i+1),i);
+                this->children[1]->SetValueAtIndex(this->children[1]->GetValueAtIndex(i+2),i+1);
+            }
+            this->children[1]->SetValueAtIndex(nullptr,children_count_-1);
+            this->children[1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),key_count_-1);
+            return false;
         }
-        return false;
     }
-    if(ind != this->key_count_-1){
-        this->children[ind]->SetKeyAtIndex(this->keys[ind-1],(key_count_-1)/2-1);
-        this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(0),(key_count_-1)/2);
-        for(int i=0; i<(this->key_count_+1)/2; ++i){
-            this->children[ind]->SetKeyAtIndex(this->children[ind+1]->GetKeyAtIndex(i),(key_count_-1)/2+i);
-            this->children[ind]->SetValueAtIndex(this->children[ind+1]->GetValueAtIndex(i+1),(key_count_-1)/2+1+i);
-        }
-        for(; ind<key_count_; ++ind){
-            this->keys[ind] = this->keys[ind+1];
-            this->children[ind+1] = this->children[ind+2];
-        }
-        this->keys[ind] = std::numeric_limits<KEY>::max();
-        this->children[ind+1] = nullptr;
-    }
+    if(this->keys[key_count_/2-1] == std::numeric_limits<KEY>::max())
+        return true;
     return false;
 }
 
@@ -244,11 +258,11 @@ void InnerNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
     for(int ind = key_count_-1; ind >= 0; --ind){
         if(this->keys[ind] == std::numeric_limits<KEY>::max()) continue;
         this->children[ind+1]->ConvertToNewTree(root);
-        if(leaf_) this->children[ind+1]->~Node();
+        if(leaf_) delete this->children[ind+1];
     }
     this->children[0]->ConvertToNewTree(root);
-    this->children[0]->~Node();
-    this->~InnerNode();
+    delete this->children[0];
+    delete this;
 }
 
 template < typename KEY, typename VALUE >

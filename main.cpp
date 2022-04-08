@@ -21,11 +21,13 @@ int main(){
 	std::cout<<test.search(17)<<std::endl;
 	std::cout<<test.search(6)<<std::endl;
 	std::cout<<test.search(7)<<std::endl;
-	//test.remove(6);
-	//test.structure();
-	test.remove(17);
+	test.remove(6);
+	test.structure();
+	test.remove(15);
 	test.structure();
 	test.remove(12);
+	test.structure();
+	test.remove(8);
 	test.structure();
 	//std::cout<<test.search(17)<<std::endl;
 	return 0;
