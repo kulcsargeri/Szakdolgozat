@@ -15,7 +15,7 @@ public:
     VALUE search(KEY key) const;
     void insert(KEY key, VALUE value);
     void remove(KEY key);
-    void changeChildrenCount(int new_children_count);
+    void ChangeChildrenCount(int new_children_count);
     void structure();
     Tree(int _children_count);
 };
@@ -24,7 +24,7 @@ template< typename KEY, typename VALUE >
 Tree<KEY, VALUE> :: Tree(int _children_count){
     children_count_ = _children_count;
     this->root_ = new InnerNode<KEY, VALUE>(_children_count-1, _children_count);
-    this->root_->children[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
+    this->root_->children_[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
     this->root_->root_ = true;
     this->root_->leaf_ = true;
 }
@@ -54,9 +54,11 @@ void Tree<KEY, VALUE> :: remove(KEY key){
 }
 
 template< typename KEY, typename VALUE >
-void Tree<KEY, VALUE> :: changeChildrenCount(int new_children_count){
+void Tree<KEY, VALUE> :: ChangeChildrenCount(int new_children_count){
     Tree<KEY, VALUE> tree = new Tree(new_children_count);
     this->root_->ConvertToNewTree(tree->root_);
+    delete this->root_;
+    *this = tree;
 }
 
 template< typename KEY, typename VALUE >
