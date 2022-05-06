@@ -90,6 +90,99 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
 }
 
 template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::AddWithoutSplit(int& i, AdditionalNode<KEY, VALUE>& a_node){
+    this->FirstCopy(i, this->key_count_, a_node);
+    a_node.nodehelper_ = nullptr;
+    a_node.keyhelper_ = 0;
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::FirstCopy(int& a, int b, AdditionalNode<KEY, VALUE> a_node){ //első fél eltolása végéig/feléig beszúrás utántól
+    while(a<--b){
+        this->keys_[b] = this->keys_[b-1];
+        this->children_[b+1] = this->children_[b];
+    }
+    this->keys_[a] = a_node.keyhelper_;
+    this->children_[a+1] = a_node.nodehelper_;
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::SecondCopy(int& a, int b, int& innerind, InnerNode<KEY, VALUE>* innerhelper){ //második fél másolása a beszúrásig/-tól
+    while(a<b){
+        innerhelper->keys_[innerind] = this->keys_[a];
+        innerhelper->children_[innerind+1] = this->children_[a+1];
+        this->keys_[a] = std::numeric_limits<KEY>::max();
+        this->children_[a+1] = nullptr;
+        ++a;
+        ++innerind;
+    }
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::SplitToLastHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
+    int j=(this->children_count_+1)/2;
+    if(i != j){ //nem a második fél első eleme a beszúrandó elem
+        CopyLastHalfWithAddingElement(i, j, innerind, innerhelper, a_node);
+    } else { //második fél első eleme
+        innerhelper->children_[innerind] = a_node.nodehelper_;
+    }
+    SecondCopy(j, this->key_count_, innerind, innerhelper);
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::CopyLastHalfWithAddingElement(int& i, int& j, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
+    KEY keyhelper = this->keys_[j];
+    this->keys_[j] = std::numeric_limits<KEY>::max();
+    ++j;
+    innerhelper->children_[innerind] = this->children_[j];
+    this->children_[j] = nullptr;
+    SecondCopy(j, i, innerind, innerhelper);
+    innerhelper->keys_[innerind] = a_node.keyhelper_;
+    innerhelper->children_[innerind+1] = a_node.nodehelper_;
+    ++innerind;
+    a_node.keyhelper_ = keyhelper;
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::SplitToFirstHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
+    int b = (this->children_count_+1)/2;
+    KEY k = this->keys_[i];
+    Node<KEY, VALUE>* v = this->children_[i+1];
+    this->keys_[i] = a_node.keyhelper_;
+    this->children_[i+1] = a_node.nodehelper_;
+    KEY khelper;
+    Node<KEY, VALUE>* vhelper;
+    while(++i<b && k != std::numeric_limits<KEY>::max()){
+        khelper = this->keys_[i];
+        vhelper = this->children_[i+1];
+        this->keys_[i] = k;
+        this->children_[i+1] = v;
+        k = khelper;
+        v = vhelper;
+    }
+    innerhelper->keys_[innerind] = this->keys_[i];
+    innerhelper->children_[innerind] = vhelper;
+    ++innerind;
+    a_node.keyhelper_ = khelper;
+    this->keys_[i] = std::numeric_limits<KEY>::max();
+    ++i;
+    innerhelper->children_[innerind] = this->children_[i];
+    this->children_[i] = nullptr;
+    SecondCopy(i, this->key_count_, innerind, innerhelper);
+}
+
+template < typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::CreateNewRoot(AdditionalNode<KEY, VALUE>& a_node){
+    InnerNode<KEY, VALUE>* nroot = new InnerNode(this->key_count_, this->children_count_);
+    nroot->root_ = true;
+    nroot->keys_[0] = a_node.keyhelper_;
+    nroot->children_[0] = this;
+    nroot->children_[1] = a_node.nodehelper_;
+    a_node.nodehelper_ = nroot;
+    this->root_ = false;
+}
+
+template < typename KEY, typename VALUE >
 VALUE InnerNode<KEY, VALUE>::search(KEY key) const { //rekurzív lineáris keresés
     for(int i=0; i<this->key_count_; ++i){
         if(this->keys_[i]>key)
@@ -233,18 +326,6 @@ void InnerNode<KEY, VALUE>::AskOlderSiblingForChildren(int& ind){
     this->children_[1]->SetKeyAtIndex(std::numeric_limits<KEY>::max(),key_count_-1);
 }
 
-template< typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
-    for(int ind = key_count_-1; ind >= 0; --ind){
-        if(this->keys_[ind] == std::numeric_limits<KEY>::max()) continue;
-        this->children_[ind+1]->ConvertToNewTree(root);
-        if(leaf_) delete this->children_[ind+1];
-    }
-    this->children_[0]->ConvertToNewTree(root);
-    delete this->children_[0];
-    delete this;
-}
-
 template < typename KEY, typename VALUE >
 KEY InnerNode<KEY, VALUE>::GetKeyAtIndex(int keyIndex){
     return this->keys_[keyIndex];
@@ -270,103 +351,16 @@ bool InnerNode<KEY, VALUE>::GetKeyIsMaxAtIndex(int keyIndex){
     return this->keys_[keyIndex] == std::numeric_limits<KEY>::max();
 }
 
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::AddWithoutSplit(int& i, AdditionalNode<KEY, VALUE>& a_node){
-    this->FirstCopy(i, this->key_count_, a_node);
-    a_node.nodehelper_ = nullptr;
-    a_node.keyhelper_ = 0;
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::FirstCopy(int& a, int b, AdditionalNode<KEY, VALUE> a_node){ //első fél eltolása végéig/feléig beszúrás utántól
-    KEY k = this->keys_[a];
-    Node<KEY, VALUE>* v = this->children_[a+1];
-    this->keys_[a] = a_node.keyhelper_;
-    this->children_[a+1] = a_node.nodehelper_;
-    while(++a<b && k != std::numeric_limits<KEY>::max()){
-        KEY khelper = this->keys_[a];
-        Node<KEY, VALUE>* vhelper = this->children_[a+1];
-        this->keys_[a] = k;
-        this->children_[a+1] = v;
-        k = khelper;
-        v = vhelper;
+template< typename KEY, typename VALUE >
+void InnerNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
+    for(int ind = key_count_-1; ind >= 0; --ind){
+        if(this->keys_[ind] == std::numeric_limits<KEY>::max()) continue;
+        this->children_[ind+1]->ConvertToNewTree(root);
+        if(leaf_) delete this->children_[ind+1];
     }
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::SecondCopy(int& a, int b, int& innerind, InnerNode<KEY, VALUE>* innerhelper){ //második fél másolása a beszúrásig/-tól
-    while(a<b){
-        innerhelper->keys_[innerind] = this->keys_[a];
-        innerhelper->children_[innerind+1] = this->children_[a+1];
-        this->keys_[a] = std::numeric_limits<KEY>::max();
-        this->children_[a+1] = nullptr;
-        ++a;
-        ++innerind;
-    }
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::SplitToLastHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
-    int j=(this->children_count_+1)/2;
-    if(i != j){ //nem a második fél első eleme a beszúrandó elem
-        CopyLastHalfWithAddingElement(i, j, innerind, innerhelper, a_node);
-    } else { //második fél első eleme
-        innerhelper->children_[innerind] = a_node.nodehelper_;
-    }
-    SecondCopy(j, this->key_count_, innerind, innerhelper);
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::CopyLastHalfWithAddingElement(int& i, int& j, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
-    KEY keyhelper = this->keys_[j];
-    this->keys_[j] = std::numeric_limits<KEY>::max();
-    ++j;
-    innerhelper->children_[innerind] = this->children_[j];
-    this->children_[j] = nullptr;
-    SecondCopy(j, i, innerind, innerhelper);
-    innerhelper->keys_[innerind] = a_node.keyhelper_;
-    innerhelper->children_[innerind+1] = a_node.nodehelper_;
-    ++innerind;
-    a_node.keyhelper_ = keyhelper;
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::SplitToFirstHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
-    int b = (this->children_count_+1)/2;
-    KEY k = this->keys_[i];
-    Node<KEY, VALUE>* v = this->children_[i+1];
-    this->keys_[i] = a_node.keyhelper_;
-    this->children_[i+1] = a_node.nodehelper_;
-    KEY khelper;
-    Node<KEY, VALUE>* vhelper;
-    while(++i<b && k != std::numeric_limits<KEY>::max()){
-        khelper = this->keys_[i];
-        vhelper = this->children_[i+1];
-        this->keys_[i] = k;
-        this->children_[i+1] = v;
-        k = khelper;
-        v = vhelper;
-    }
-    innerhelper->keys_[innerind] = this->keys_[i];
-    innerhelper->children_[innerind] = vhelper;
-    ++innerind;
-    a_node.keyhelper_ = khelper;
-    this->keys_[i] = std::numeric_limits<KEY>::max();
-    ++i;
-    innerhelper->children_[innerind] = this->children_[i];
-    this->children_[i] = nullptr;
-    SecondCopy(i, this->key_count_, innerind, innerhelper);
-}
-
-template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::CreateNewRoot(AdditionalNode<KEY, VALUE>& a_node){
-    InnerNode<KEY, VALUE>* nroot = new InnerNode(this->key_count_, this->children_count_);
-    nroot->root_ = true;
-    nroot->keys_[0] = a_node.keyhelper_;
-    nroot->children_[0] = this;
-    nroot->children_[1] = a_node.nodehelper_;
-    a_node.nodehelper_ = nroot;
-    this->root_ = false;
+    this->children_[0]->ConvertToNewTree(root);
+    delete this->children_[0];
+    delete this;
 }
 
 template < typename KEY, typename VALUE >
