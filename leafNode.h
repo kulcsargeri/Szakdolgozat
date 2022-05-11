@@ -14,9 +14,9 @@ class LeafNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
-        void ConvertToNewTree(Node<KEY, VALUE>* root) override;
+        void ConvertToNewTree(Tree<KEY, VALUE>* tree) override;
         bool IsKeyInTree(KEY key) const override;
-        void print() override;
+        void print(int space_count) override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
@@ -42,14 +42,17 @@ AdditionalNode<KEY, VALUE> LeafNode<KEY, VALUE>::add(KEY key, VALUE value){ //ú
 
 template < typename KEY, typename VALUE >
 VALUE LeafNode<KEY, VALUE>::search(KEY key) const { //visszatérés VALUE-val, ha volt ilyen elem
-    if(this->key_ == key)
-        return this->value_;
-    return nullptr;
+    if(key != key_)
+        throw "Key is not in tree!";
+    return this->value_;
 }
 
 template < typename KEY, typename VALUE >
-void LeafNode<KEY, VALUE>::print(){
-    std::cout<<"("<<key_<<") ";
+void LeafNode<KEY, VALUE>::print(int space_count){
+    for(int i=0; i<space_count; ++i){
+        std::cout<<" ";
+    }
+    std::cout<<"- ["<<key_<<"]\n";
 }
 
 template < typename KEY, typename VALUE >
@@ -58,8 +61,8 @@ bool LeafNode<KEY, VALUE>::remove(KEY key) {
 }
 
 template< typename KEY, typename VALUE >
-void LeafNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
-    root->add(this->key_, this->value_);
+void LeafNode<KEY, VALUE>::ConvertToNewTree(Tree<KEY, VALUE>* tree){
+    tree->insert(this->key_, this->value_);
 }
 
 template< typename KEY, typename VALUE >

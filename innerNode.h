@@ -37,8 +37,8 @@ class InnerNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
-        void ConvertToNewTree(Node<KEY, VALUE>* root) override; //TODO: rekurziv destruktor hivasok
-        void print() override;
+        void ConvertToNewTree(Tree<KEY, VALUE>* tree) override; //TODO: rekurziv destruktor hivasok
+        void print(int space_count) override;
         bool IsKeyInTree(KEY key) const override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
@@ -77,7 +77,7 @@ AdditionalNode<KEY, VALUE> InnerNode<KEY, VALUE>::add(KEY key, VALUE value){
     int innerind = 0; //hasítani fogunk
     InnerNode<KEY, VALUE>* innerhelper = new InnerNode(this->key_count_, this->children_count_);
     if(this->leaf_) innerhelper->leaf_ = true;
-    if(i>=(this->children_count_+1)/2){ //beillesztés a csúcs második felébe kerül, így másolás után tudjuk ezt megtenni
+    if(i>=(this->children_count_)/2){ //beillesztés a csúcs második felébe kerül, így másolás után tudjuk ezt megtenni
         SplitToLastHalf(i, innerind, innerhelper, a_node);
     }else{ //első félbe kell beilleszteni
         SplitToFirstHalf(i, innerind, innerhelper, a_node);
@@ -120,7 +120,7 @@ void InnerNode<KEY, VALUE>::SecondCopy(int& a, int b, int& innerind, InnerNode<K
 
 template < typename KEY, typename VALUE >
 void InnerNode<KEY, VALUE>::SplitToLastHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
-    int j=(this->children_count_+1)/2;
+    int j=(this->children_count_)/2;
     if(i != j){ //nem a második fél első eleme a beszúrandó elem
         CopyLastHalfWithAddingElement(i, j, innerind, innerhelper, a_node);
     } else { //második fél első eleme
@@ -145,13 +145,13 @@ void InnerNode<KEY, VALUE>::CopyLastHalfWithAddingElement(int& i, int& j, int& i
 
 template < typename KEY, typename VALUE >
 void InnerNode<KEY, VALUE>::SplitToFirstHalf(int& i, int& innerind, InnerNode<KEY, VALUE>* innerhelper, AdditionalNode<KEY, VALUE>& a_node){
-    int b = (this->children_count_+1)/2;
+    int b = (this->children_count_)/2;
     KEY k = this->keys_[i];
     Node<KEY, VALUE>* v = this->children_[i+1];
     this->keys_[i] = a_node.keyhelper_;
     this->children_[i+1] = a_node.nodehelper_;
-    KEY khelper;
-    Node<KEY, VALUE>* vhelper;
+    KEY khelper = k;
+    Node<KEY, VALUE>* vhelper = v;
     while(++i<b && k != std::numeric_limits<KEY>::max()){
         khelper = this->keys_[i];
         vhelper = this->children_[i+1];
@@ -254,6 +254,7 @@ void InnerNode<KEY, VALUE>::MergeWithYoungerSibling(int& ind){
     ++from_ind;
     this->children_[ind-1]->SetKeyAtIndex(this->keys_[ind-1],from_ind);
     this->children_[ind-1]->SetValueAtIndex(this->children_[ind]->GetValueAtIndex(0),from_ind+1);
+    ++from_ind;
     for(int i=0; this->children_[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
             this->children_[ind-1]->SetKeyAtIndex(this->children_[ind]->GetKeyAtIndex(i),from_ind);
             this->children_[ind-1]->SetValueAtIndex(this->children_[ind]->GetValueAtIndex(i+1),from_ind+1);
@@ -352,26 +353,39 @@ bool InnerNode<KEY, VALUE>::GetKeyIsMaxAtIndex(int keyIndex){
 }
 
 template< typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::ConvertToNewTree(Node<KEY, VALUE>* root){
+void InnerNode<KEY, VALUE>::ConvertToNewTree(Tree<KEY, VALUE>* tree){
     for(int ind = key_count_-1; ind >= 0; --ind){
         if(this->keys_[ind] == std::numeric_limits<KEY>::max()) continue;
-        this->children_[ind+1]->ConvertToNewTree(root);
+        this->children_[ind+1]->ConvertToNewTree(tree);
         if(leaf_) delete this->children_[ind+1];
     }
-    this->children_[0]->ConvertToNewTree(root);
+    this->children_[0]->ConvertToNewTree(tree);
     delete this->children_[0];
     delete this;
 }
 
 template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::print(){
-    std::cout<<"(";
-    children_[0]->print();
-    for(int i=0; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
-        std::cout<<keys_[i]<<" ";
-        children_[i+1]->print();
+void InnerNode<KEY, VALUE>::print(int space_count){
+    for(int i=0; i<space_count; ++i){
+        std::cout<<" ";
     }
-    std::cout<<")";
+    if(!root_) std::cout<<"- ";
+    std::cout<<"keys: ["<<keys_[0];
+    for(int i=1; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
+        std::cout<<", "<<keys_[i];
+    }
+    std::cout<<"]\n";
+    for(int i=0; i<space_count; ++i){
+        std::cout<<" ";
+    }
+    if(!root_) std::cout<<"  ";
+    std::cout<<"children:\n";
+    int new_space_count = space_count;
+    new_space_count += root_ ? 2 : 4;
+    children_[0]->print(new_space_count);
+    for(int i=0; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
+        children_[i+1]->print(new_space_count);
+    }
 }
 
 #endif
