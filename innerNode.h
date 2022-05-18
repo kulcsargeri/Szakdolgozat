@@ -38,7 +38,7 @@ class InnerNode : public Node <KEY, VALUE>
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
         void ConvertToNewTree(Tree<KEY, VALUE>* tree) override; //TODO: rekurziv destruktor hivasok
-        void print(int space_count) override;
+        void print(int space_count, std::ofstream& myfile) override;
         bool IsKeyInTree(KEY key) const override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
@@ -365,26 +365,26 @@ void InnerNode<KEY, VALUE>::ConvertToNewTree(Tree<KEY, VALUE>* tree){
 }
 
 template < typename KEY, typename VALUE >
-void InnerNode<KEY, VALUE>::print(int space_count){
+void InnerNode<KEY, VALUE>::print(int space_count, std::ofstream& myfile){
     for(int i=0; i<space_count; ++i){
-        std::cout<<" ";
+        myfile<<" ";
     }
-    if(!root_) std::cout<<"- ";
-    std::cout<<"keys: ["<<keys_[0];
+    if(!root_) myfile<<"- ";
+    myfile<<"keys: ["<<keys_[0];
     for(int i=1; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
-        std::cout<<", "<<keys_[i];
+        myfile<<", "<<keys_[i];
     }
-    std::cout<<"]\n";
+    myfile<<"]\n";
     for(int i=0; i<space_count; ++i){
-        std::cout<<" ";
+        myfile<<" ";
     }
-    if(!root_) std::cout<<"  ";
-    std::cout<<"children:\n";
+    if(!root_) myfile<<"  ";
+    myfile<<"children:\n";
     int new_space_count = space_count;
     new_space_count += root_ ? 2 : 4;
-    children_[0]->print(new_space_count);
+    children_[0]->print(new_space_count, myfile);
     for(int i=0; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
-        children_[i+1]->print(new_space_count);
+        children_[i+1]->print(new_space_count, myfile);
     }
 }
 

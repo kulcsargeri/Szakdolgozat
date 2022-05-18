@@ -16,7 +16,7 @@ class LeafNode : public Node <KEY, VALUE>
         bool remove(KEY key) override;
         void ConvertToNewTree(Tree<KEY, VALUE>* tree) override;
         bool IsKeyInTree(KEY key) const override;
-        void print(int space_count) override;
+        void print(int space_count, std::ofstream& myfile) override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
         KEY GetKeyAtIndex(int keyIndex) override;
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
@@ -48,11 +48,11 @@ VALUE LeafNode<KEY, VALUE>::search(KEY key) const { //visszatérés VALUE-val, h
 }
 
 template < typename KEY, typename VALUE >
-void LeafNode<KEY, VALUE>::print(int space_count){
+void LeafNode<KEY, VALUE>::print(int space_count, std::ofstream& myfile){
     for(int i=0; i<space_count; ++i){
-        std::cout<<" ";
+        myfile<<" ";
     }
-    std::cout<<"- ["<<key_<<"]\n";
+    myfile<<"- ["<<key_<<"]\n";
 }
 
 template < typename KEY, typename VALUE >

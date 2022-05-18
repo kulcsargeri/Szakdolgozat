@@ -102,7 +102,9 @@ int main(){
 
     //CreateNewRoot()
     test.insert(2594, "20adik");
-    //test.structure();
+    test.structure();
+
+    //fájlokba minden egyes structure
 
     // std::cout<<test.search(17)<<std::endl;
 	// std::cout<<test.search(6)<<std::endl;

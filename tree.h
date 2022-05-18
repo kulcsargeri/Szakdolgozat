@@ -1,6 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include <fstream>
 #include "node.h"
 #include "innerNode.h"
 #include "leafNode.h"
@@ -11,18 +12,20 @@ class Tree
 private:
     InnerNode<KEY, VALUE>* root_; // TODO: esetleg Node<KEY, VALUE>*
     int children_count_;
+    int number_of_prints_;
 public:
     VALUE search(KEY key) const;
     void insert(KEY key, VALUE value);
     void remove(KEY key);
     void ChangeChildrenCount(int new_children_count);
     void structure();
-    Tree(int _children_count);
+    Tree(int _children_count, int number_of_prints = 0);
 };
 
 template< typename KEY, typename VALUE >
-Tree<KEY, VALUE>::Tree(int _children_count){
+Tree<KEY, VALUE>::Tree(int _children_count, int _number_of_prints){
     children_count_ = _children_count;
+    number_of_prints_ = _number_of_prints;
     this->root_ = new InnerNode<KEY, VALUE>(_children_count-1, _children_count);
     this->root_->children_[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
     this->root_->root_ = true;
@@ -63,7 +66,7 @@ void Tree<KEY, VALUE>::remove(KEY key){
 
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE>::ChangeChildrenCount(int new_children_count){
-    Tree<KEY, VALUE>* tree = new Tree<KEY, VALUE>(new_children_count);
+    Tree<KEY, VALUE>* tree = new Tree<KEY, VALUE>(new_children_count, number_of_prints_);
     this->root_->ConvertToNewTree(tree);
     delete this->root_;
     this->root_ = tree->root_;
@@ -72,10 +75,15 @@ void Tree<KEY, VALUE>::ChangeChildrenCount(int new_children_count){
 
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE>::structure(){
-    std::cout<<"keys_per_block: "<<this->children_count_-1<<"\n";
-    std::cout<<"tree:\n";
-    this->root_->print(2);
-    std::cout<<"\n";
+    ++number_of_prints_;
+    std::string filename = "structure" + std::to_string(number_of_prints_) + ".yml";
+    std::ofstream myfile;
+    myfile.open(filename);
+    myfile<<"keys_per_block: "<<this->children_count_-1<<"\n";
+    myfile<<"tree:\n";
+    this->root_->print(2, myfile);
+    myfile<<"\n";
+    myfile.close();
 }
 
 #endif

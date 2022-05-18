@@ -2,3 +2,6 @@
 .vscode/
 *.gcda
 *.gcno
+*.yml
+*.py
+*.svg

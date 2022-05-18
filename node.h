@@ -25,7 +25,7 @@ class Node
         virtual AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) = 0;
         virtual void ConvertToNewTree(Tree<KEY, VALUE>* tree) = 0;
         virtual bool IsKeyInTree(KEY key) const = 0;
-        virtual void print(int space_count) = 0;
+        virtual void print(int space_count, std::ofstream& myfile) = 0;
         virtual bool GetKeyIsMaxAtIndex(int keyIndex) = 0;
         virtual KEY GetKeyAtIndex(int keyIndex) = 0;
         virtual Node<KEY,VALUE>* GetValueAtIndex(int vaueIndex) = 0;
