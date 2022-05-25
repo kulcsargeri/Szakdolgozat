@@ -370,11 +370,11 @@ void InnerNode<KEY, VALUE>::print(int space_count, std::ofstream& myfile){
         myfile<<" ";
     }
     if(!root_) myfile<<"- ";
-    myfile<<"keys: ["<<keys_[0];
+    if(keys_[0] != std::numeric_limits<KEY>::max()) myfile<<"keys: ["<<keys_[0];
     for(int i=1; i<key_count_ && keys_[i] != std::numeric_limits<KEY>::max(); ++i){
         myfile<<", "<<keys_[i];
     }
-    myfile<<"]\n";
+    if(keys_[0] != std::numeric_limits<KEY>::max()) myfile<<"]\n";
     for(int i=0; i<space_count; ++i){
         myfile<<" ";
     }

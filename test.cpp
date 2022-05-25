@@ -13,47 +13,66 @@ int main(){
 	test.insert(682,"nyolcadik");
 	test.insert(1009,"kilencedik");
 	test.insert(1667,"tizedik");
-    //test.structure();
+    
+    
+    test.structure(); //1
 
     //AddWithoutSplit()
     test.insert(1483,"11edik");
-    //test.structure();
+    
+    test.structure(); //2
     
     //CreateNewRoot()
     test.insert(1378,"hatodik");
-    //test.structure();
+    
+    test.structure(); //3
 
+    
     test.insert(275, "13adik");
+ 
+ 
+    test.structure(); //4
 
     //SplitToLastHalf()
     test.insert(803, "14edik");
-    //test.structure();
+    
+    test.structure(); //5
 	
+    
     test.insert(1320, "15odik");
+
+
+    test.structure(); //6
 
     //SplitToFirstHalf()
     test.insert(1162, "16odik");
-    //test.structure();
+    
+    test.structure(); //7
 
     //AskYoungerSiblingForChildren()
     test.remove(1320);
-    //test.structure();
+    
+    test.structure(); //8
 
     //MergeWithYoungerSibling()
     test.remove(1009);
-    //test.structure();
+    
+    test.structure(); //9
 
     //MergeWithOlderSibling()
     test.remove(1483);
-    //test.structure();
+    
+    test.structure(); //10
 
     //AfterRemoveAboveLeafs()
     test.remove(785);
-    //test.structure();
+    
+    test.structure(); //11
 
     //AskOlderSiblingForChildren()
     test.remove(275);
-    //test.structure();
+    
+    test.structure(); //12
 
     //Search key not in tree
     std::cout<<test.search(275)<<"\n";
@@ -62,47 +81,68 @@ int main(){
     std::cout<<test.search(1667)<<"\n";
 
     test.ChangeChildrenCount(5);
-    //test.structure();
+    
+    test.structure(); //13
 
     //SplitToFirstHalf()
     test.insert(572, "17edik");
-    //test.structure();
+    
+    test.structure(); //14
 
     //MergeWithYoungerSibling()
     test.remove(1274);
-    //test.structure();
+    
+    test.structure(); //15
 
     //SplitToLastHalf()
     test.insert(1140, "18adik");
-    //test.structure();
+    
+    test.structure(); //16
 
     //MergeWithOlderSibling()
     test.remove(572);
-    //test.structure();
+    
+    test.structure(); //17
+
 
     test.remove(1595);
     test.remove(1162);
     test.remove(1751);
-    
+
+
+    test.structure(); //18
+
     //AskYoungerSiblingForChildren()
     test.remove(1140);
-    //test.structure();
+    
+    test.structure(); //19
+
 
     test.remove(1107);
 
+
+    test.structure(); //20
+
     //AddWithoutSplit()
     test.insert(1163, "19edik");
-    //test.structure();
+    
+    test.structure(); //21
 
     //AskOlderSiblingForChildren()
     test.remove(803);
-    //test.structure();
+    
+    test.structure(); //22
+
 
     test.remove(1378);
+    
+
+    test.structure(); //23
 
     //CreateNewRoot()
     test.insert(2594, "20adik");
-    test.structure();
+    
+    test.structure(); //24
 
     //fájlokba minden egyes structure
 
