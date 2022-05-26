@@ -12,8 +12,8 @@ class Tree
 private:
     InnerNode<KEY, VALUE>* root_; // TODO: esetleg Node<KEY, VALUE>*
     int children_count_;
-    int number_of_prints_;
 public:
+    int number_of_prints_;
     VALUE search(KEY key) const;
     void insert(KEY key, VALUE value);
     void remove(KEY key);

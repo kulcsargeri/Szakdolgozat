@@ -354,6 +354,7 @@ bool InnerNode<KEY, VALUE>::GetKeyIsMaxAtIndex(int keyIndex){
 
 template< typename KEY, typename VALUE >
 void InnerNode<KEY, VALUE>::ConvertToNewTree(Tree<KEY, VALUE>* tree){
+    if(this->children_[0]->GetKeyAtIndex(0) == std::numeric_limits<KEY>::max()) return;
     for(int ind = key_count_-1; ind >= 0; --ind){
         if(this->keys_[ind] == std::numeric_limits<KEY>::max()) continue;
         this->children_[ind+1]->ConvertToNewTree(tree);

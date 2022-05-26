@@ -15,9 +15,11 @@ void displaymenu(){
 }
 
 void CreateNewTree(int children_count, Tree<int, std::string>* tree){
+	int print_count = tree->number_of_prints_;
 	delete tree;
-	Tree<int, std::string>* newtree = new Tree<int, std::string>(children_count);
+	Tree<int, std::string>* newtree = new Tree<int, std::string>(children_count/*, tree->number_of_prints_*/);
 	tree = newtree;
+	tree->number_of_prints_ = print_count;
 }
 
 void AddData(int key, std::string value, Tree<int, std::string>* tree){
@@ -29,7 +31,7 @@ void RemoveData(int key, Tree<int, std::string>* tree){
 }
 
 void SearchData(int key, Tree<int, std::string>* tree){
-	tree->search(key);
+	std::cout<<tree->search(key)<<"\n";
 }
 
 void PrintTree(Tree<int, std::string>* tree){
@@ -43,12 +45,11 @@ void ChangeTree(int children_count, Tree<int, std::string>* tree){
 int main(){
 	std::cout<<"You are given a tree with int, string parameters and children count is 4\n";
 	Tree<int, std::string>* tree = new Tree<int, std::string>(4);
-	
-	displaymenu(); 
 	int your_choice;
+	displaymenu();
 	do
-	{ 
-		std::cout<<"Enter your choice(1-6):\n";
+	{
+		std::cout<<"Enter your choice(0-6):\n";
 		std::cin>>your_choice;
 		int children_count;
 		int key;
