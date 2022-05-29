@@ -10,7 +10,7 @@ template< typename KEY, typename VALUE >
 class Tree
 {
 private:
-    InnerNode<KEY, VALUE>* root_; // TODO: esetleg Node<KEY, VALUE>*
+    InnerNode<KEY, VALUE>* root_;
     int children_count_;
 public:
     int number_of_prints_;
@@ -38,7 +38,7 @@ Tree<KEY, VALUE>::~Tree(){
     delete this->root_;
 }
 
-template< typename KEY, typename VALUE > //TODO: try catch nullptr
+template< typename KEY, typename VALUE >
 VALUE Tree<KEY, VALUE>::search(KEY key) const { //fő osztályban a keresés
     try{
         VALUE v = root_->search(key);
@@ -51,6 +51,7 @@ VALUE Tree<KEY, VALUE>::search(KEY key) const { //fő osztályban a keresés
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE>::insert(KEY key, VALUE value){ //fő osztályban a beszúrás
     AdditionalNode<KEY, VALUE> a_node = root_->add(key, value);
+    if(this->root_->children_[1]->GetKeyAtIndex(0) == std::numeric_limits<KEY>::max()) delete this->root_->children_[1];
     if(a_node.nodehelper_ != nullptr){ //új gyökércsúcs keletkezett
 
         this->root_ = static_cast<InnerNode<KEY, VALUE>*>(a_node.nodehelper_);
@@ -66,6 +67,7 @@ void Tree<KEY, VALUE>::remove(KEY key){
             this->root_->root_ = true;
         }
         std::cout<<"Successful deletion\n";
+        if(this->root_->GetValueAtIndex(0) == nullptr) this->root_->children_[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
     }
     else std::cout<<"Unsuccessful deletion\n";
 }

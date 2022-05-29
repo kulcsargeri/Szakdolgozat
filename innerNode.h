@@ -37,7 +37,7 @@ class InnerNode : public Node <KEY, VALUE>
         AdditionalNode<KEY, VALUE> add(KEY key, VALUE value) override;
         VALUE search(KEY key) const override;
         bool remove(KEY key) override;
-        void ConvertToNewTree(Tree<KEY, VALUE>* tree) override; //TODO: rekurziv destruktor hivasok
+        void ConvertToNewTree(Tree<KEY, VALUE>* tree) override;
         void print(int space_count, std::ofstream& myfile) override;
         bool IsKeyInTree(KEY key) const override;
         bool GetKeyIsMaxAtIndex(int keyIndex) override;
@@ -45,7 +45,6 @@ class InnerNode : public Node <KEY, VALUE>
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
         void SetKeyAtIndex(KEY key, int keyIndex) override;
         void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
-        // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
         friend class Tree<KEY, VALUE>;
         ~InnerNode() override;
 };
@@ -68,6 +67,8 @@ InnerNode<KEY, VALUE>::~InnerNode(){
     for(int i=0; i<children_count_; ++i){
         delete children_[i];
     }
+    delete[] children_;
+    delete[] keys_;
 }
 
 
@@ -215,18 +216,18 @@ bool InnerNode<KEY, VALUE>::remove(KEY key) {
         ++ind;
     }
     bool split = this->children_[ind]->remove(key);
-    if(leaf_){//tesztelve
+    if(leaf_){
         AfterRemoveAboveLeafs(ind);
     }
-    else if(!split) return false;//tesztelve
+    else if(!split) return false;
     else if(ind != 0){
-        if(this->children_[ind-1]->GetKeyIsMaxAtIndex(key_count_/2)){//tesztelve
+        if(this->children_[ind-1]->GetKeyIsMaxAtIndex(key_count_/2)){
             MergeWithYoungerSibling(ind);
-        }else{//tesztelve
+        }else{
             AskYoungerSiblingForChildren(ind);
         }
     }
-    else if(ind == 0){//tesztelve
+    else if(ind == 0){
         if(this->children_[1]->GetKeyIsMaxAtIndex(key_count_/2)){
             MergeWithOlderSibling(ind);
         }else{
@@ -306,7 +307,7 @@ void InnerNode<KEY, VALUE>::MergeWithOlderSibling(int& ind){
     this->children_[0]->SetKeyAtIndex(this->keys_[0],from_ind);
     this->children_[0]->SetValueAtIndex(this->children_[1]->GetValueAtIndex(0),from_ind+1);
     ++from_ind;
-    for(int i=0; this->children_[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
+    for(int i=0; from_ind < this->key_count_ && this->children_[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
             this->children_[0]->SetKeyAtIndex(this->children_[1]->GetKeyAtIndex(i),from_ind);
             this->children_[0]->SetValueAtIndex(this->children_[1]->GetValueAtIndex(i+1),from_ind+1);
     }
