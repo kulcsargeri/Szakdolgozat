@@ -22,7 +22,7 @@ class LeafNode : public Node <KEY, VALUE>
         Node<KEY, VALUE>* GetValueAtIndex(int valueIndex) override;
         void SetKeyAtIndex(KEY key, int keyIndex) override;
         void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
-        ~LeafNode();
+        ~LeafNode() override {};
 };
 
 template < typename KEY, typename VALUE >

@@ -31,6 +31,7 @@ class Node
         virtual Node<KEY,VALUE>* GetValueAtIndex(int vaueIndex) = 0;
         virtual void SetKeyAtIndex(KEY key, int keyIndex) = 0;
         virtual void SetValueAtIndex(Node<KEY,VALUE>* value, int valueIndex) = 0;
+        virtual ~Node() = default;
 };
 
 template < typename KEY, typename VALUE >

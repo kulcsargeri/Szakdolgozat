@@ -47,7 +47,7 @@ class InnerNode : public Node <KEY, VALUE>
         void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
         // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
         friend class Tree<KEY, VALUE>;
-        ~InnerNode();
+        ~InnerNode() override;
 };
 
 template < typename KEY, typename VALUE >
@@ -264,8 +264,11 @@ void InnerNode<KEY, VALUE>::MergeWithYoungerSibling(int& ind){
     this->children_[ind-1]->SetValueAtIndex(this->children_[ind]->GetValueAtIndex(0),from_ind+1);
     ++from_ind;
     for(int i=0; this->children_[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
-            this->children_[ind-1]->SetKeyAtIndex(this->children_[ind]->GetKeyAtIndex(i),from_ind);
-            this->children_[ind-1]->SetValueAtIndex(this->children_[ind]->GetValueAtIndex(i+1),from_ind+1);
+        this->children_[ind-1]->SetKeyAtIndex(this->children_[ind]->GetKeyAtIndex(i),from_ind);
+        this->children_[ind-1]->SetValueAtIndex(this->children_[ind]->GetValueAtIndex(i+1),from_ind+1);
+    }
+    for(int i=0; i<children_count_; ++i){
+        this->children_[ind]->SetValueAtIndex(nullptr, i);
     }
     delete this->children_[ind];
     for(ind; ind<key_count_; ++ind){
@@ -306,6 +309,9 @@ void InnerNode<KEY, VALUE>::MergeWithOlderSibling(int& ind){
     for(int i=0; this->children_[ind]->GetKeyAtIndex(i) != std::numeric_limits<KEY>::max(); ++i, ++from_ind){
             this->children_[0]->SetKeyAtIndex(this->children_[1]->GetKeyAtIndex(i),from_ind);
             this->children_[0]->SetValueAtIndex(this->children_[1]->GetValueAtIndex(i+1),from_ind+1);
+    }
+    for(int i=0; i<children_count_; ++i){
+        this->children_[1]->SetValueAtIndex(nullptr, i);
     }
     delete this->children_[1];
     ++ind;
