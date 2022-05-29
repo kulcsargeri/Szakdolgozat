@@ -17,7 +17,7 @@ void displaymenu(){
 void CreateNewTree(int children_count, Tree<int, std::string>* tree){
 	int print_count = tree->number_of_prints_;
 	delete tree;
-	Tree<int, std::string>* newtree = new Tree<int, std::string>(children_count/*, tree->number_of_prints_*/);
+	Tree<int, std::string>* newtree = new Tree<int, std::string>(children_count, print_count);
 	tree = newtree;
 	tree->number_of_prints_ = print_count;
 }
@@ -62,18 +62,18 @@ int main(){
 				CreateNewTree(children_count, tree);
 				break;
 			case 2:
-				std::cout<<"Enter int, std::string you want to insert in tree\n";
+				std::cout<<"Enter key, value you want to insert in tree\n";
 				std::cin>>key;
 				std::cin>>value;
 				AddData(key, value, tree);
 				break;
 			case 3:
-				std::cout<<"Enter the int of the data you want to remove from tree\n";
+				std::cout<<"Enter the key of the data you want to remove from tree\n";
 				std::cin>>key;
 				RemoveData(key, tree);
 				break;
 			case 4:
-				std::cout<<"Enter the int of the data you are searching for in the tree\n";
+				std::cout<<"Enter the key of the data you are searching for in the tree\n";
 				std::cin>>key;
 				SearchData(key, tree);
 				break;

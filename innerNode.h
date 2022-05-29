@@ -46,7 +46,8 @@ class InnerNode : public Node <KEY, VALUE>
         void SetKeyAtIndex(KEY key, int keyIndex) override;
         void SetValueAtIndex(Node<KEY, VALUE>* value, int valueIndex) override;
         // TODO: Is it necessary? Only used when adding a guard leaf node. Maybe create a method?
-        friend class Tree<KEY, VALUE>; 
+        friend class Tree<KEY, VALUE>;
+        ~InnerNode();
 };
 
 template < typename KEY, typename VALUE >
@@ -60,6 +61,13 @@ InnerNode<KEY, VALUE>::InnerNode(int _key_count, int _children_count) : Node<KEY
         children_[i] = nullptr;
     }
     children_[key_count_] = nullptr;
+}
+
+template < typename KEY, typename VALUE >
+InnerNode<KEY, VALUE>::~InnerNode(){
+    for(int i=0; i<children_count_; ++i){
+        delete children_[i];
+    }
 }
 
 
@@ -358,11 +366,8 @@ void InnerNode<KEY, VALUE>::ConvertToNewTree(Tree<KEY, VALUE>* tree){
     for(int ind = key_count_-1; ind >= 0; --ind){
         if(this->keys_[ind] == std::numeric_limits<KEY>::max()) continue;
         this->children_[ind+1]->ConvertToNewTree(tree);
-        if(leaf_) delete this->children_[ind+1];
     }
     this->children_[0]->ConvertToNewTree(tree);
-    delete this->children_[0];
-    delete this;
 }
 
 template < typename KEY, typename VALUE >

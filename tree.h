@@ -20,6 +20,7 @@ public:
     void ChangeChildrenCount(int new_children_count);
     void structure();
     Tree(int _children_count, int number_of_prints = 0);
+    ~Tree();
 };
 
 template< typename KEY, typename VALUE >
@@ -30,6 +31,11 @@ Tree<KEY, VALUE>::Tree(int _children_count, int _number_of_prints){
     this->root_->children_[0] = new LeafNode<KEY, VALUE>(std::numeric_limits<KEY>::max(), VALUE());
     this->root_->root_ = true;
     this->root_->leaf_ = true;
+}
+
+template< typename KEY, typename VALUE >
+Tree<KEY, VALUE>::~Tree(){
+    delete this->root_;
 }
 
 template< typename KEY, typename VALUE > //TODO: try catch nullptr
@@ -61,16 +67,16 @@ void Tree<KEY, VALUE>::remove(KEY key){
         }
         std::cout<<"Successful deletion\n";
     }
-    else std::cout<<"Unseccessful deletion\n";
+    else std::cout<<"Unsuccessful deletion\n";
 }
 
 template< typename KEY, typename VALUE >
 void Tree<KEY, VALUE>::ChangeChildrenCount(int new_children_count){
     Tree<KEY, VALUE>* tree = new Tree<KEY, VALUE>(new_children_count, number_of_prints_);
     this->root_->ConvertToNewTree(tree);
-    delete this->root_;
-    this->root_ = tree->root_;
-    this->children_count_ = new_children_count;
+    std::swap(this->root_, tree->root_);
+    std::swap(this->children_count_, tree->children_count_);
+    delete tree;
 }
 
 template< typename KEY, typename VALUE >
